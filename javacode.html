@@ -1,0 +1,238 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Develop a Java desktop Application using Embedded DB and Hibernate1</title>
+<style type="text/css">
+<!--
+.style1 {font-family: Verdana, Arial, Helvetica, sans-serif}
+-->
+</style>
+</head>
+<body>
+<h1 class="style1">Develop a Java desktop Application using Embedded DB+Hibernate</h1>
+<p class="style1">In this tutorial, I will show you how to develop a desktop Java Application using embedded db and hibernate ORM framework/tool. The example will run simply two queries INSERT and SELECT to insert and fetch entities into database.</p>
+     <p class="style1">&nbsp;     </p>
+	 
+     <h1><span class="style1">Project Environment     </span>
+     </h1>
+<p class="style1">The following tools and technologies are used for this example</p>
+<p class="style1">1.       Hibernate  </p>
+<p class="style1">2.       Eclipse  </p>
+<p class="style1">3.       JDK 1.7  </p>
+<p class="style1">4.       Apache Derby DB (derby.jar only)  </p>
+<p class="style1">&nbsp;</p>
+<p class="style1">Note: Here for the simplicity I am using Apache Derby database but you can use any database that provides embeddable facility for example SQLite, Berkeley DB, FireBird, MS Access, HSQLdb, etc.
+  Here is a list of the Embedded DBs available http://en.wikipedia.org/wiki/Embedded_database </p>
+<p class="style1">&nbsp;</p>
+<h1 class="style1">Project Structure</h1>
+
+     <p class="style1">Have a look on the project structure carefully, note the jars used for the project and the derby.jar used in the project is the most important jar, the rest of the jars it is showing under Referenced Libraries folder will be created by default, we only need to add derby.jar</p>
+     <p class="style1"><img src="Practise/Practise/tutorials/Hibernate Embedded DB App/Project Structure.jpg" alt="Java" width="804" height="485" /></p>
+     <p class="style1">&nbsp;     </p>
+     <h1 class="style1">A Model Class</h1>
+
+     <p class="style1">Here I am using annotations to declare the class as model class, you can use hibernate mapping xml configuration as well.</p>
+     <p class="style1">User.java </p>
+     <pre style="background:#f1f1f1;
+width:700px;
+background-color:#f1f1f1;
+border:1px solid #e3e3e3;
+padding:10px;
+border-radius:9px;">package org.nikhil.model;
+
+<span style="color:#069;font-weight:700">import</span> javax.persistence.Entity;
+<span style="color:#069;font-weight:700">import</span> javax.persistence.GeneratedValue;
+<span style="color:#069;font-weight:700">import</span> javax.persistence.Id;
+<span style="color:#069;font-weight:700">import</span> javax.persistence.Table;
+
+@Entity
+@Table(<span style="color:#45ae34;font-weight:700">name</span><span style="color:#069;font-weight:700">=</span><span style="color:#666">"USERS"</span>)
+<span style="color:#069;font-weight:700">public</span> <span style="color:#ff5600">class</span> <span style="color:#21439c">User</span> {
+    
+    @Id
+    @GeneratedValue
+    <span style="color:#069;font-weight:700">private</span> <span style="color:#45ae34;font-weight:700">int</span> id;
+    <span style="color:#069;font-weight:700">private</span> <span style="color:#ff5600">String</span> firstName;
+    <span style="color:#069;font-weight:700">private</span> <span style="color:#ff5600">String</span> lastName;
+    
+    <span style="color:#069;font-weight:700">public</span> <span style="color:#45ae34;font-weight:700">int</span> <span style="color:#45ae34;font-weight:700">getId</span>() {
+        <span style="color:#069;font-weight:700">return</span> id;
+    }
+    <span style="color:#069;font-weight:700">public</span> <span style="color:#45ae34;font-weight:700">void</span> setId(<span style="color:#45ae34;font-weight:700">int</span> id) {
+        <span style="color:#45ae34;font-weight:700">this</span>.id <span style="color:#069;font-weight:700">=</span> id;
+    }
+    <span style="color:#069;font-weight:700">public</span> <span style="color:#ff5600">String</span> getFirstName() {
+        <span style="color:#069;font-weight:700">return</span> firstName;
+    }
+    <span style="color:#069;font-weight:700">public</span> <span style="color:#45ae34;font-weight:700">void</span> setFirstName(<span style="color:#ff5600">String</span> firstName) {
+        <span style="color:#45ae34;font-weight:700">this</span>.firstName <span style="color:#069;font-weight:700">=</span> firstName;
+    }
+    <span style="color:#069;font-weight:700">public</span> <span style="color:#ff5600">String</span> getLastName() {
+        <span style="color:#069;font-weight:700">return</span> lastName;
+    }
+    <span style="color:#069;font-weight:700">public</span> <span style="color:#45ae34;font-weight:700">void</span> setLastName(<span style="color:#ff5600">String</span> lastName) {
+        <span style="color:#45ae34;font-weight:700">this</span>.lastName <span style="color:#069;font-weight:700">=</span> lastName;
+    }
+    
+}
+
+</pre>
+
+ 
+
+
+<h1>&nbsp;</h1>
+<h1 class="style1">Hibernate Configuration file</h1>
+<span class="style1">Create a Hibernate’s configuration file and put it under the source root folder, fill in your Derby settings accordingly
+	 
+
+Hibernate.cfg.xml </span>
+<pre style="background:#f1f1f1;
+width:700px;
+background-color:#f1f1f1;
+border:1px solid #e3e3e3;
+padding:10px;
+border-radius:9px;"><span style="color:#7a7a7a">&lt;?<span style="color:#016cff">xml</span> <span style="color:#963dff">version</span>=<span style="color:#666">"1.0"</span> <span style="color:#963dff">encoding</span>=<span style="color:#666">"UTF-8"</span>?></span>
+<span style="color:#7a7a7a">&lt;!<span style="color:#7a7a7a"><span style="color:#016cff">DOCTYPE</span> hibernate-configuration PUBLIC
+        <span style="color:#666">"-//Hibernate/Hibernate Configuration DTD 3.0//EN"</span>
+        <span style="color:#666">"http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd"</span></span>></span>
+
+<span style="color:#7a7a7a">&lt;<span style="color:#016cff">hibernate</span><span style="color:#963dff">-configuration</span>></span>
+
+    <span style="color:#7a7a7a">&lt;<span style="color:#016cff">session</span><span style="color:#963dff">-factory</span>></span>
+
+        <span style="color:#af82d4">&lt;!-- Database connection settings --></span>
+        <span style="color:#7a7a7a">&lt;<span style="color:#016cff">property</span> <span style="color:#963dff">name</span>=<span style="color:#666">"connection.driver_class"</span>></span>org.apache.derby.jdbc.EmbeddedDriver<span style="color:#7a7a7a">&lt;/<span style="color:#016cff">property</span>></span>
+        <span style="color:#7a7a7a">&lt;<span style="color:#016cff">property</span> <span style="color:#963dff">name</span>=<span style="color:#666">"connection.url"</span>></span>jdbc:derby:employee;create=true<span style="color:#7a7a7a">&lt;/<span style="color:#016cff">property</span>></span>
+        <span style="color:#7a7a7a">&lt;<span style="color:#016cff">property</span> <span style="color:#963dff">name</span>=<span style="color:#666">"connection.username"</span>></span>user<span style="color:#7a7a7a">&lt;/<span style="color:#016cff">property</span>></span>
+        <span style="color:#7a7a7a">&lt;<span style="color:#016cff">property</span> <span style="color:#963dff">name</span>=<span style="color:#666">"connection.password"</span>></span>password<span style="color:#7a7a7a">&lt;/<span style="color:#016cff">property</span>></span>
+
+        <span style="color:#af82d4">&lt;!-- JDBC connection pool (use the built-in) --></span>
+        <span style="color:#7a7a7a">&lt;<span style="color:#016cff">property</span> <span style="color:#963dff">name</span>=<span style="color:#666">"connection.pool_size"</span>></span>1<span style="color:#7a7a7a">&lt;/<span style="color:#016cff">property</span>></span>
+
+        <span style="color:#af82d4">&lt;!-- SQL dialect --></span>
+        <span style="color:#7a7a7a">&lt;<span style="color:#016cff">property</span> <span style="color:#963dff">name</span>=<span style="color:#666">"dialect"</span>></span>org.hibernate.dialect.DerbyDialect<span style="color:#7a7a7a">&lt;/<span style="color:#016cff">property</span>></span>
+
+        <span style="color:#af82d4">&lt;!-- Second-level cache  --></span>
+<span style="color:#af82d4">&lt;!--         &lt;property name="cache.use_second_level_cache">true&lt;/property>
+        &lt;property name="cache.use_query_cache">true&lt;/property> 
+        &lt;property name="cache.provider_class">org.hibernate.cache.EhCacheProvider&lt;/property> --></span>
+ 
+        <span style="color:#af82d4">&lt;!-- Echo all executed SQL to stdout --></span>
+        <span style="color:#7a7a7a">&lt;<span style="color:#016cff">property</span> <span style="color:#963dff">name</span>=<span style="color:#666">"show_sql"</span>></span>true<span style="color:#7a7a7a">&lt;/<span style="color:#016cff">property</span>></span>
+
+        <span style="color:#af82d4">&lt;!-- Drop and re-create the database schema on startup --></span>
+        <span style="color:#7a7a7a">&lt;<span style="color:#016cff">property</span> <span style="color:#963dff">name</span>=<span style="color:#666">"hbm2ddl.auto"</span>></span>update<span style="color:#7a7a7a">&lt;/<span style="color:#016cff">property</span>></span>
+
+        <span style="color:#7a7a7a">&lt;<span style="color:#016cff">mapping</span> <span style="color:#963dff">class</span>=<span style="color:#666">"org.nikhil.model.User"</span> /></span>
+
+    <span style="color:#7a7a7a">&lt;/<span style="color:#016cff">session</span><span style="color:#963dff">-factory</span>></span>
+
+<span style="color:#7a7a7a">&lt;/<span style="color:#016cff">hibernate</span><span style="color:#963dff">-configuration</span>></span>
+
+
+
+</pre>
+
+ 
+
+ 
+
+<h1>&nbsp;</h1>
+<h1 class="style1">User Application Class</h1>
+<span class="style1">We need to create a class to insert records and retrieve values from the database to test the project, for that create a User Application Class and pass some values.
+
+
+UserApplication.java</span>
+<pre style="background:#f1f1f1;
+width:700px;
+background-color:#f1f1f1;
+border:1px solid #e3e3e3;
+padding:10px;
+border-radius:9px;">package org.nikhil.application;
+
+<span style="color:#069;font-weight:700">import</span> java.util.<span style="color:#a535ae">List</span>;
+
+<span style="color:#069;font-weight:700">import</span> org.hibernate.Query;
+<span style="color:#069;font-weight:700">import</span> org.hibernate.Session;
+<span style="color:#069;font-weight:700">import</span> org.hibernate.SessionFactory;
+<span style="color:#069;font-weight:700">import</span> org.hibernate.cfg.Configuration;
+<span style="color:#069;font-weight:700">import</span> org.nikhil.model.User;
+
+<span style="color:#069;font-weight:700">public</span> <span style="color:#ff5600">class</span> <span style="color:#21439c">UserApplication</span> {
+
+    <span style="color:#069;font-weight:700">public</span> <span style="color:#069;font-weight:700">static</span> <span style="color:#45ae34;font-weight:700">void</span> main(<span style="color:#ff5600">String</span>[] args) {
+        
+        <span style="color:#ff5600">String</span> <span style="color:#45ae34;font-weight:700">name</span>;
+        
+        User user <span style="color:#069;font-weight:700">=</span> <span style="color:#069;font-weight:700">new</span> User();
+        user.setFirstName(<span style="color:#666">"Genelia"</span>);
+        user.setLastName(<span style="color:#666">"DSouza"</span>);
+        
+        SessionFactory sessionFactory <span style="color:#069;font-weight:700">=</span> <span style="color:#069;font-weight:700">new</span> Configuration().configure().buildSessionFactory();
+        Session session <span style="color:#069;font-weight:700">=</span> sessionFactory.openSession();
+        
+        session.beginTransaction();
+        session.save(user);
+        session.getTransaction().commit();
+        
+        session <span style="color:#069;font-weight:700">=</span> sessionFactory.openSession();
+        session.beginTransaction();
+        Query query <span style="color:#069;font-weight:700">=</span> session.createQuery(<span style="color:#666">"from User"</span>);
+        
+        <span style="color:#a535ae">List</span>&lt;User> <span style="color:#45ae34;font-weight:700">list</span> <span style="color:#069;font-weight:700">=</span> query.<span style="color:#45ae34;font-weight:700">list</span>();
+        
+        <span style="color:#069;font-weight:700">for</span>(User user1<span style="color:#069;font-weight:700">:</span><span style="color:#45ae34;font-weight:700">list</span>){
+            <span style="color:#45ae34;font-weight:700">name</span> <span style="color:#069;font-weight:700">=</span> user1.getFirstName();
+            <span style="color:#a535ae">System</span>.out.println(<span style="color:#45ae34;font-weight:700">name</span>);
+        }
+        
+        session.getTransaction().commit();
+        
+    }
+
+}
+
+</pre>
+
+ 
+
+<h1>&nbsp;</h1>
+<h1 class="style1">Now Let’s Run the application</h1>
+<span class="style1">Output</span>
+<pre style="background:#f1f1f1;
+width:700px;
+background-color:#f1f1f1;
+border:1px solid #e3e3e3;
+padding:10px;
+border-radius:9px;">Hibernate: <span style="color:#069;font-weight:700">insert into</span> USERS (id, firstName, lastName) <span style="color:#069;font-weight:700">values</span> (default, ?, ?)
+Hibernate: <span style="color:#069;font-weight:700">values</span> identity_val_local()
+Hibernate: <span style="color:#069;font-weight:700">select</span> user0_.id <span style="color:#069;font-weight:700">as</span> id0_, user0_.firstName <span style="color:#069;font-weight:700">as</span> firstName0_, user0_.lastName <span style="color:#069;font-weight:700">as</span> lastName0_
+ <span style="color:#069;font-weight:700">from</span> USERS user0_
+Genelia
+</pre>
+
+ 
+
+
+<p>&nbsp;</p>
+<p class="style1">Note: Unlike Server based databases such as Oracle, MS SQL, MySQL, PostgreSQL, DB2, you do not need to create a database manually and do not need to start the server. Because embedded database is server less (that is the biggest advantage of the embedded db).</p>
+<p class="style1">&nbsp;</p>
+<p class="style1"> Have a look at your project structure again. It will create a database, a table, will insert the records and it will retrieve values from the table, all it once.</p>
+<p class="style1">&nbsp;</p>
+<p class="style1">You can download the code here  </p>
+<p class="style1">&nbsp;</p>
+<p class="style1">This code gives a clear idea about how to embed a database into a desktop application
+  
+  I will suggest going for MS Access database because the database gives more advantages than any other embedded database mentioned above, for example MS Access comes with MS Office package so no need to separately install, graphical UI is better, non technical users can easily understand the data into the tables structure, server less so no need to start/restart server and the biggest advantage is user can run multiple instances of the application (you need to create your application thread safe), that feature is not supported by any other embedded databases mentioned above. 
+  
+  
+  
+  
+  
+  
+  
+  If you want to build your application in a single executable jar file and create an installation setup file click here </p>
+</body>
+</html>
