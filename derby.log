@@ -1,0 +1,10 @@
+----------------------------------------------------------------
+Sat Jun 07 15:06:44 IST 2014:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.8.2.2 - (1181258): instance a816c00e-0146-75af-ca2e-000000b47080 
+on database directory C:\Users\hp\workspace\new kepler practice\HibernateProject1\employee  with class loader sun.misc.Launcher$AppClassLoader@7ced01 
+Loaded from file:/C:/Users/hp/Practise/Setups/Apache%20Derby%20DB/db-derby-10.8.2.2-bin/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=1.7.0_55-b14
+user.dir=C:\Users\hp\workspace\new kepler practice\HibernateProject1
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
